@@ -57,7 +57,7 @@ class RecyclerHomeScreen extends StatelessWidget {
           ),
           // Recycler role badge
           Container(
-            margin: const EdgeInsets.only(right: 14, top: 12, bottom: 12),
+            margin: const EdgeInsets.only(right: 4, top: 12, bottom: 12),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
               color: kSignal.withAlpha(25),
@@ -71,6 +71,31 @@ class RecyclerHomeScreen extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
+            ),
+          ),
+          // P2 — Offline pill
+          Container(
+            margin: const EdgeInsets.only(right: 10, top: 12, bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: kSignal.withAlpha(30),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: kSignal.withAlpha(120)),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.wifi_off, size: 11, color: kSignal),
+                SizedBox(width: 4),
+                Text(
+                  'Offline',
+                  style: TextStyle(
+                    color: kSignal,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

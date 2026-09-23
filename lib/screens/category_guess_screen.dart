@@ -44,8 +44,10 @@ class _CategoryGuessScreenState extends State<CategoryGuessScreen> {
         : _kGuessIds;
     _selectedId = _guessIds.first;
 
-    // Simulate edge AI analysis delay
-    Future.delayed(const Duration(milliseconds: 1000), () {
+    // NOTE (Hackathon prototype): Per AGENTS.md, this is a short delay
+    // followed by placeholder category suggestions, not a trained ML model.
+    // Production roadmap: on-device TFLite model.
+    Future.delayed(const Duration(milliseconds: 900), () {
       if (mounted) setState(() => _loading = false);
     });
   }
@@ -365,15 +367,21 @@ class _CategoryGuessScreenState extends State<CategoryGuessScreen> {
                             // Section header
                             Row(
                               children: [
-                                const Icon(Icons.auto_awesome,
+                                const Icon(Icons.lightbulb_outline,
                                     color: kBrass, size: 18),
                                 const SizedBox(width: 6),
-                                Text(
-                                  str('ai_suggestions', lang),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: kInkSoft,
+                                Expanded(
+                                  child: Text(
+                                    lang == 'mr'
+                                        ? 'श्रेणी सूचना — पुष्टी करा किंवा स्वतः निवडा'
+                                        : (lang == 'hi'
+                                            ? 'श्रेणी सुझाव — पुष्टि करें या मैन्युअल रूप से चुनें'
+                                            : 'Category suggestion — confirm or choose manually'),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: kInkSoft,
+                                    ),
                                   ),
                                 ),
                               ],

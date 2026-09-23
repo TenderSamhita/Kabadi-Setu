@@ -77,10 +77,14 @@ class CollectorHomeScreen extends StatelessWidget {
               ),
             ),
             Text(
-              'Rate Board',
+              lang == 'mr'
+                  ? 'न्याय्य किंमत • सुरक्षित पुनर्वापर • ऑफलाइन'
+                  : (lang == 'hi'
+                      ? 'उचित मूल्य • सुरक्षित रिसाइकलिंग • ऑफलाइन'
+                      : 'Fair prices • Safe recycling • Offline-first'),
               style: TextStyle(
                 color: kChalk.withAlpha(140),
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -140,6 +144,7 @@ class CollectorHomeScreen extends StatelessWidget {
             onPressed: () => _openRateCardScanner(context, state, lang),
           ),
           _RoleBadge(label: str('collector', lang)),
+          const _OfflinePill(),
           const SizedBox(width: 8),
         ],
       ),
@@ -311,7 +316,7 @@ class _RoleBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(right: 14, top: 12, bottom: 12),
+        margin: const EdgeInsets.only(right: 4, top: 12, bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
         decoration: BoxDecoration(
           border: Border.all(color: kBrass),
@@ -324,6 +329,38 @@ class _RoleBadge extends StatelessWidget {
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
+        ),
+      );
+}
+
+/// P2 — Offline mode pill. Always visible — the app is always offline by design.
+/// Color: kSignal (green) to communicate offline mode as a feature, not a failure.
+class _OfflinePill extends StatelessWidget {
+  const _OfflinePill();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        margin: const EdgeInsets.only(right: 10, top: 12, bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: kSignal.withAlpha(30),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: kSignal.withAlpha(120)),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.wifi_off, size: 11, color: kSignal),
+            SizedBox(width: 4),
+            Text(
+              'Offline',
+              style: TextStyle(
+                color: kSignal,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       );
 }

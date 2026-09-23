@@ -9,6 +9,7 @@ import '../strings.dart';
 import '../theme.dart';
 import '../widgets/circular_impact_card.dart';
 import 'capture_screen.dart';
+import 'fair_price_screen.dart';
 import 'recycler_match_screen.dart';
 
 /// Quote screen — shows the full draft lot summary with a ±15% price range.
@@ -192,6 +193,11 @@ class QuoteScreen extends StatelessWidget {
                     // ── Circular Economy & Mineral Recovery Impact Card ─────
                     CircularImpactCard(impact: ecoImpact, lang: lang),
 
+                    const SizedBox(height: 12),
+
+                    // ── Calculation breakdown (expandable) ─────────────────
+                    _CalculationBreakdown(lot: lot, lang: lang),
+
                     const SizedBox(height: 16),
                   ],
                 ),
@@ -200,7 +206,7 @@ class QuoteScreen extends StatelessWidget {
 
             // ── Action buttons ─────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: OutlinedButton.icon(
                 onPressed: () => Navigator.of(context).push<void>(
                   MaterialPageRoute<void>(
@@ -218,14 +224,38 @@ class QuoteScreen extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: kInk,
                   side: const BorderSide(color: kRule, width: 1.5),
-                  minimumSize: const Size(double.infinity, 56),
+                  minimumSize: const Size(double.infinity, 52),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ),
+            // Compare Prices — new P1 feature
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                      builder: (_) => const FairPriceScreen()),
+                ),
+                icon: const Icon(Icons.compare_arrows, color: kSignal),
+                label: Text(
+                  lang == 'mr'
+                      ? 'किंमत तुलना करा'
+                      : (lang == 'hi' ? 'कीमत तुलना करें' : 'Compare Prices'),
+                  style: const TextStyle(fontSize: 16, color: kSignal),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: kSignal,
+                  side: const BorderSide(color: kSignal, width: 1.5),
+                  minimumSize: const Size(double.infinity, 52),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: FilledButton.icon(
                 onPressed: () => Navigator.of(context).push<void>(
                   MaterialPageRoute<void>(
@@ -354,3 +384,175 @@ class _NoteStack extends StatelessWidget {
   }
 }
 
+// ── Calculation Breakdown (P3) ────────────────────────────────────────────────
+
+/// Expandable "How is this calculated?" section.
+/// Uses existing lot data — no new state required.
+/// Clearly labels this as a prototype using weight × rate.
+class _CalculationBreakdown extends StatefulWidget {
+  final Lot lot;
+  final String lang;
+
+  const _CalculationBreakdown({required this.lot, required this.lang});
+
+  @override
+  State<_CalculationBreakdown> createState() => _CalculationBreakdownState();
+}
+
+class _CalculationBreakdownState extends State<_CalculationBreakdown> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = widget.lang;
+    final lot = widget.lot;
+    final base = lot.indicativeValue;
+    final low = (base * 0.85).round();
+    final high = (base * 1.15).round();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: kCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: kRule),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  const Icon(Icons.calculate_outlined, size: 18, color: kBrass),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      lang == 'mr'
+                          ? 'हे कसे मोजले जाते?'
+                          : (lang == 'hi'
+                              ? 'यह कैसे गणना की जाती है?'
+                              : 'How is this calculated?'),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: kInk,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: kInkSoft,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded) ...[
+            const Divider(height: 1, color: kRule),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...lot.items.map((item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.categoryNameEn,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: kInk,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            _CalcRow(
+                              label: lang == 'mr' ? 'वजन' : (lang == 'hi' ? 'वज़न' : 'Weight'),
+                              value: '${item.weightKg.toStringAsFixed(1)} kg',
+                            ),
+                            _CalcRow(
+                              label: lang == 'mr' ? 'दर' : (lang == 'hi' ? 'दर' : 'Rate'),
+                              value: '₹${item.ratePerKg}/kg',
+                            ),
+                            _CalcRow(
+                              label: lang == 'mr' ? 'गणना' : (lang == 'hi' ? 'गणना' : 'Calculation'),
+                              value: '${item.weightKg.toStringAsFixed(1)} × ₹${item.ratePerKg} = ₹${item.indicativeValue}',
+                              highlight: true,
+                            ),
+                          ],
+                        ),
+                      )),
+                  if (lot.items.length > 1) ...[
+                    const Divider(color: kRule, height: 16),
+                    _CalcRow(
+                      label: lang == 'mr' ? 'एकूण' : (lang == 'hi' ? 'कुल' : 'Total'),
+                      value: '₹$base',
+                      highlight: true,
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  const Divider(color: kRule, height: 8),
+                  const SizedBox(height: 4),
+                  _CalcRow(
+                    label: lang == 'mr' ? 'बाजार श्रेणी' : (lang == 'hi' ? 'बाजार सीमा' : 'Market range'),
+                    value: '±15% → ₹$low – ₹$high',
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: kBrass.withAlpha(15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: kBrass.withAlpha(60)),
+                    ),
+                    child: Text(
+                      lang == 'mr'
+                          ? 'वजन × साहित्य दर वापरून अंदाज. हे प्रोटोटाइप आहे; उत्पादन आवृत्ती प्रमाणित वजन यंत्र डेटा वापरेल.'
+                          : (lang == 'hi'
+                              ? 'वज़न × सामग्री दर से अनुमान। यह प्रोटोटाइप है; उत्पादन संस्करण प्रमाणित तौल डेटा उपयोग करेगा।'
+                              : 'Estimate = weight × material rate. This is a prototype — production will use certified weighbridge data.'),
+                      style: const TextStyle(fontSize: 11, color: kInk, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CalcRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool highlight;
+
+  const _CalcRow({required this.label, required this.value, this.highlight = false});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label,
+                style: TextStyle(
+                    fontSize: 12,
+                    color: kInkSoft,
+                    fontWeight: highlight ? FontWeight.w600 : FontWeight.normal)),
+            Text(value,
+                style: TextStyle(
+                    fontSize: 12,
+                    color: highlight ? kBrass : kInk,
+                    fontWeight: highlight ? FontWeight.bold : FontWeight.normal)),
+          ],
+        ),
+      );
+}

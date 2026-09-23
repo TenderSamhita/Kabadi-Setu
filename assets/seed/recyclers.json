@@ -1,0 +1,93 @@
+[
+  {
+    "id": "r1",
+    "name": "Vidarbha E-Waste Recyclers",
+    "lat": 21.1458,
+    "lng": 79.0882,
+    "authorised": true,
+    "pickupAvailable": true,
+    "ratesByCategory": {
+      "pcb_populated": 195,
+      "cable": 48,
+      "battery_liion": 130,
+      "motor": 58,
+      "bare_board": 70,
+      "mixed_cable": 40
+    }
+  },
+  {
+    "id": "r2",
+    "name": "Nagpur Green Recyclers",
+    "lat": 21.1602,
+    "lng": 79.0632,
+    "authorised": true,
+    "pickupAvailable": false,
+    "ratesByCategory": {
+      "pcb_populated": 185,
+      "cable": 46,
+      "battery_liion": 125,
+      "crt_glass": 9,
+      "motor": 56,
+      "mixed_plastic": 13,
+      "lcd_panel": 98,
+      "battery_leadacid": 30,
+      "bare_board": 68,
+      "mixed_cable": 39
+    }
+  },
+  {
+    "id": "r3",
+    "name": "Central India E-Cycle",
+    "lat": 21.1320,
+    "lng": 79.1050,
+    "authorised": true,
+    "pickupAvailable": true,
+    "ratesByCategory": {
+      "pcb_populated": 190,
+      "cable": 47,
+      "lcd_panel": 100,
+      "motor": 57,
+      "bare_board": 67,
+      "mixed_cable": 41
+    }
+  },
+  {
+    "id": "r4",
+    "name": "Eco Collect Nagpur",
+    "lat": 21.1749,
+    "lng": 79.0715,
+    "authorised": false,
+    "pickupAvailable": true,
+    "ratesByCategory": {
+      "pcb_populated": 170,
+      "cable": 42,
+      "battery_liion": 115,
+      "crt_glass": 7,
+      "motor": 50,
+      "mixed_plastic": 11,
+      "battery_leadacid": 25,
+      "bare_board": 60,
+      "mixed_cable": 35
+    }
+  },
+  {
+    "id": "r5",
+    "name": "Maharashtra E-Scrap Hub",
+    "lat": 21.0988,
+    "lng": 79.0541,
+    "authorised": true,
+    "pickupAvailable": false,
+    "ratesByCategory": {
+      "pcb_populated": 188,
+      "cable": 45,
+      "battery_liion": 122,
+      "crt_glass": 8,
+      "motor": 54,
+      "mixed_plastic": 12,
+      "lcd_panel": 96,
+      "battery_leadacid": 28,
+      "bare_board": 66,
+      "mixed_cable": 38
+    }
+  }
+]

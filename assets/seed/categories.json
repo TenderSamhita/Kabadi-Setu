@@ -1,0 +1,92 @@
+[
+  {
+    "id": "pcb_populated",
+    "nameEn": "Populated PCB",
+    "nameHi": "भरा हुआ PCB",
+    "nameMr": "भरलेला PCB",
+    "ratePerKg": 180,
+    "hazardLevel": 0,
+    "icon": "pcb"
+  },
+  {
+    "id": "cable",
+    "nameEn": "Cable",
+    "nameHi": "केबल",
+    "nameMr": "केबल",
+    "ratePerKg": 45,
+    "hazardLevel": 0,
+    "icon": "cable"
+  },
+  {
+    "id": "battery_liion",
+    "nameEn": "Li-ion Battery",
+    "nameHi": "ली-आयन बैटरी",
+    "nameMr": "लि-आयन बॅटरी",
+    "ratePerKg": 120,
+    "hazardLevel": 2,
+    "icon": "battery"
+  },
+  {
+    "id": "crt_glass",
+    "nameEn": "CRT Glass",
+    "nameHi": "CRT कांच",
+    "nameMr": "CRT काच",
+    "ratePerKg": 8,
+    "hazardLevel": 3,
+    "icon": "crt"
+  },
+  {
+    "id": "motor",
+    "nameEn": "Motor",
+    "nameHi": "मोटर",
+    "nameMr": "मोटर",
+    "ratePerKg": 55,
+    "hazardLevel": 0,
+    "icon": "motor"
+  },
+  {
+    "id": "mixed_plastic",
+    "nameEn": "Mixed Plastic",
+    "nameHi": "मिश्रित प्लास्टिक",
+    "nameMr": "मिश्र प्लास्टिक",
+    "ratePerKg": 12,
+    "hazardLevel": 1,
+    "icon": "plastic"
+  },
+  {
+    "id": "lcd_panel",
+    "nameEn": "LCD Panel",
+    "nameHi": "LCD पैनल",
+    "nameMr": "LCD पॅनेल",
+    "ratePerKg": 95,
+    "hazardLevel": 1,
+    "icon": "lcd"
+  },
+  {
+    "id": "battery_leadacid",
+    "nameEn": "Lead-acid Battery",
+    "nameHi": "लेड-एसिड बैटरी",
+    "nameMr": "लेड-अॅसिड बॅटरी",
+    "ratePerKg": 28,
+    "hazardLevel": 3,
+    "icon": "battery_lead"
+  },
+  {
+    "id": "bare_board",
+    "nameEn": "Bare PCB",
+    "nameHi": "खाली PCB",
+    "nameMr": "रिकामा PCB",
+    "ratePerKg": 65,
+    "hazardLevel": 0,
+    "icon": "bare_board"
+  },
+  {
+    "id": "mixed_cable",
+    "nameEn": "Mixed Cable",
+    "nameHi": "मिश्रित केबल",
+    "nameMr": "मिश्र केबल",
+    "ratePerKg": 38,
+    "hazardLevel": 0,
+    "icon": "mixed_cable"
+  }
+]

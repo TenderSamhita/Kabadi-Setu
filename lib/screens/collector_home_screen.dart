@@ -10,8 +10,10 @@ import '../services/tts_service.dart';
 import '../strings.dart';
 import '../theme.dart';
 import 'capture_screen.dart';
+import 'collector_profile_screen.dart';
+import 'dataset_explorer_screen.dart';
 import 'handover_screen.dart';
-import 'ledger_screen.dart';
+import 'price_board_screen.dart';
 
 // ── Static demo data ──────────────────────────────────────────────────────────
 
@@ -129,19 +131,72 @@ class CollectorHomeScreen extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: str('ledger_title', lang),
-            icon: const Icon(Icons.account_balance_wallet, color: kBrass),
+            tooltip: lang == 'mr'
+                ? 'माझी प्रोफाइल'
+                : (lang == 'hi' ? 'मेरी प्रोफ़ाइल' : 'My Profile'),
+            icon: const Icon(Icons.person_outline, color: kBrass),
             onPressed: () => Navigator.of(context).push<void>(
-              MaterialPageRoute<void>(builder: (_) => const LedgerScreen()),
+              MaterialPageRoute<void>(
+                  builder: (_) => const CollectorProfileScreen()),
             ),
           ),
-          // Scan Rate Card QR from a recycler
-          IconButton(
-            tooltip: lang == 'mr'
-                ? 'रेट कार्ड स्कॅन करा'
-                : (lang == 'hi' ? 'रेट कार्ड स्कैन करें' : 'Scan Rate Card'),
-            icon: const Icon(Icons.document_scanner_outlined, color: kBrass),
-            onPressed: () => _openRateCardScanner(context, state, lang),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: kBrass),
+            color: kCard,
+            onSelected: (value) {
+              if (value == 'price_board') {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(builder: (_) => const PriceBoardScreen()),
+                );
+              } else if (value == 'dataset') {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(builder: (_) => const DatasetExplorerScreen()),
+                );
+              } else if (value == 'rate_card') {
+                _openRateCardScanner(context, state, lang);
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'price_board',
+                child: Row(
+                  children: [
+                    const Icon(Icons.price_change, size: 18, color: kBrass),
+                    const SizedBox(width: 10),
+                    Text(
+                      lang == 'mr' ? 'भाव पत्रक' : (lang == 'hi' ? 'मूल्य बोर्ड' : 'Price Board'),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'dataset',
+                child: Row(
+                  children: [
+                    const Icon(Icons.dataset, size: 18, color: kBrass),
+                    const SizedBox(width: 10),
+                    Text(
+                      lang == 'mr' ? 'डेटासेट एक्सप्लोरर' : (lang == 'hi' ? 'डेटासेट' : 'Dataset Explorer'),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'rate_card',
+                child: Row(
+                  children: [
+                    const Icon(Icons.document_scanner_outlined, size: 18, color: kBrass),
+                    const SizedBox(width: 10),
+                    Text(
+                      lang == 'mr' ? 'रेट कार्ड स्कॅन करा' : (lang == 'hi' ? 'रेट कार्ड स्कैन करें' : 'Scan Rate Card'),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           _RoleBadge(label: str('collector', lang)),
           const _OfflinePill(),
@@ -335,34 +390,38 @@ class _RoleBadge extends StatelessWidget {
 
 /// P2 — Offline mode pill. Always visible — the app is always offline by design.
 /// Color: kSignal (green) to communicate offline mode as a feature, not a failure.
+/// Shows pending sync count badge when there are queued operations.
 class _OfflinePill extends StatelessWidget {
   const _OfflinePill();
 
   @override
-  Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(right: 10, top: 12, bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: kSignal.withAlpha(30),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: kSignal.withAlpha(120)),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.wifi_off, size: 11, color: kSignal),
-            SizedBox(width: 4),
-            Text(
-              'Offline',
-              style: TextStyle(
-                color: kSignal,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
+  Widget build(BuildContext context) {
+    final pending = context.watch<AppState>().pendingSyncCount;
+    return Container(
+      margin: const EdgeInsets.only(right: 10, top: 12, bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: kSignal.withAlpha(30),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: kSignal.withAlpha(120)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.wifi_off, size: 11, color: kSignal),
+          const SizedBox(width: 4),
+          Text(
+            pending > 0 ? 'Offline · $pending↑' : 'Offline',
+            style: const TextStyle(
+              color: kSignal,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ── Category tile ─────────────────────────────────────────────────────────────

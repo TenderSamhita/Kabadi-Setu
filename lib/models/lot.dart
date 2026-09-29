@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 /// One line item within a lot (one category + weight).
 class LotItem {
@@ -49,6 +50,20 @@ enum LotStatus {
   paid,
 }
 
+enum PaymentMethod {
+  cash,
+  upi,
+}
+
+/// Generates a LOT-YYYY-XXXXXX style traceability reference.
+String generateLotRef() {
+  final year = DateTime.now().year;
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  final rng = Random.secure();
+  final suffix = List.generate(6, (_) => chars[rng.nextInt(chars.length)]).join();
+  return 'LOT-$year-$suffix';
+}
+
 /// A collection of items being sold in one transaction.
 class Lot {
   final String id;
@@ -61,6 +76,22 @@ class Lot {
   final DateTime createdAt;
   /// 6-character uppercase reference code shown on QR screen.
   final String referenceCode;
+  /// LOT-YYYY-XXXXXX format traceability ID (generated when lot is first created).
+  final String? lotRef;
+  /// Collector identifier (generated UUID-style, no personal data).
+  final String? collectorId;
+  /// Payment method recorded at receipt.
+  final PaymentMethod? paymentMethod;
+  /// UPI transaction reference (only when paymentMethod == upi).
+  final String? upiRef;
+  /// GPS/manual coordinates where material was collected.
+  final double? collectionLat;
+  final double? collectionLng;
+  /// GPS/manual coordinates where handover occurred.
+  final double? handoverLat;
+  final double? handoverLng;
+  /// Source of location: 'gps', 'manual', or null.
+  final String? locationSource;
 
   const Lot({
     required this.id,
@@ -71,6 +102,15 @@ class Lot {
     this.matchedRecyclerId,
     this.matchedRecyclerName,
     this.agreedPrice,
+    this.lotRef,
+    this.collectorId,
+    this.paymentMethod,
+    this.upiRef,
+    this.collectionLat,
+    this.collectionLng,
+    this.handoverLat,
+    this.handoverLng,
+    this.locationSource,
   });
 
   double get totalWeightKg =>
@@ -89,6 +129,15 @@ class Lot {
         if (matchedRecyclerName != null)
           'matchedRecyclerName': matchedRecyclerName,
         if (agreedPrice != null) 'agreedPrice': agreedPrice,
+        if (lotRef != null) 'lotRef': lotRef,
+        if (collectorId != null) 'collectorId': collectorId,
+        if (paymentMethod != null) 'paymentMethod': paymentMethod!.name,
+        if (upiRef != null) 'upiRef': upiRef,
+        if (collectionLat != null) 'collectionLat': collectionLat,
+        if (collectionLng != null) 'collectionLng': collectionLng,
+        if (handoverLat != null) 'handoverLat': handoverLat,
+        if (handoverLng != null) 'handoverLng': handoverLng,
+        if (locationSource != null) 'locationSource': locationSource,
       };
 
   factory Lot.fromJson(Map<String, dynamic> json) => Lot(
@@ -102,6 +151,17 @@ class Lot {
         matchedRecyclerId: json['matchedRecyclerId'] as String?,
         matchedRecyclerName: json['matchedRecyclerName'] as String?,
         agreedPrice: json['agreedPrice'] as int?,
+        lotRef: json['lotRef'] as String?,
+        collectorId: json['collectorId'] as String?,
+        paymentMethod: json['paymentMethod'] != null
+            ? PaymentMethod.values.byName(json['paymentMethod'] as String)
+            : null,
+        upiRef: json['upiRef'] as String?,
+        collectionLat: (json['collectionLat'] as num?)?.toDouble(),
+        collectionLng: (json['collectionLng'] as num?)?.toDouble(),
+        handoverLat: (json['handoverLat'] as num?)?.toDouble(),
+        handoverLng: (json['handoverLng'] as num?)?.toDouble(),
+        locationSource: json['locationSource'] as String?,
       );
 
   Lot copyWith({
@@ -110,6 +170,15 @@ class Lot {
     String? matchedRecyclerId,
     String? matchedRecyclerName,
     int? agreedPrice,
+    String? lotRef,
+    String? collectorId,
+    PaymentMethod? paymentMethod,
+    String? upiRef,
+    double? collectionLat,
+    double? collectionLng,
+    double? handoverLat,
+    double? handoverLng,
+    String? locationSource,
   }) =>
       Lot(
         id: id,
@@ -120,11 +189,24 @@ class Lot {
         matchedRecyclerId: matchedRecyclerId ?? this.matchedRecyclerId,
         matchedRecyclerName: matchedRecyclerName ?? this.matchedRecyclerName,
         agreedPrice: agreedPrice ?? this.agreedPrice,
+        lotRef: lotRef ?? this.lotRef,
+        collectorId: collectorId ?? this.collectorId,
+        paymentMethod: paymentMethod ?? this.paymentMethod,
+        upiRef: upiRef ?? this.upiRef,
+        collectionLat: collectionLat ?? this.collectionLat,
+        collectionLng: collectionLng ?? this.collectionLng,
+        handoverLat: handoverLat ?? this.handoverLat,
+        handoverLng: handoverLng ?? this.handoverLng,
+        locationSource: locationSource ?? this.locationSource,
       );
 
   /// Serialise to a compact JSON string for embedding in QR.
+  /// Carries a plain JSON payload — intentionally NOT signed.
+  /// See AGENTS.md: "the QR carries a plain JSON payload, and that's intentional"
   String toQrPayload() => jsonEncode({
         'ref': referenceCode,
+        if (lotRef != null) 'lotRef': lotRef,
+        if (collectorId != null) 'cid': collectorId,
         'items': items
             .map((i) => {
                   'cat': i.categoryId,
@@ -134,6 +216,8 @@ class Lot {
             .toList(),
         'total': agreedPrice ?? indicativeValue,
         'ts': createdAt.millisecondsSinceEpoch,
+        if (collectionLat != null) 'lat': collectionLat,
+        if (collectionLng != null) 'lng': collectionLng,
       });
 
   /// Parse a compact QR JSON payload back into a Lot object.
@@ -150,6 +234,10 @@ class Lot {
       final ts = map['ts'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['ts'] as int)
           : DateTime.now();
+      final lotRef = map['lotRef'] as String?;
+      final collectorId = map['cid'] as String?;
+      final lat = (map['lat'] as num?)?.toDouble();
+      final lng = (map['lng'] as num?)?.toDouble();
 
       final items = rawItems.map((e) {
         final m = e as Map<String, dynamic>;
@@ -175,6 +263,10 @@ class Lot {
         referenceCode: ref,
         agreedPrice: total,
         matchedRecyclerName: matchedRecyclerName,
+        lotRef: lotRef,
+        collectorId: collectorId,
+        collectionLat: lat,
+        collectionLng: lng,
       );
     } catch (_) {
       return null;

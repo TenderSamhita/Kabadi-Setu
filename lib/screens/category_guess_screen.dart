@@ -372,11 +372,7 @@ class _CategoryGuessScreenState extends State<CategoryGuessScreen> {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    lang == 'mr'
-                                        ? 'श्रेणी सूचना — पुष्टी करा किंवा स्वतः निवडा'
-                                        : (lang == 'hi'
-                                            ? 'श्रेणी सुझाव — पुष्टि करें या मैन्युअल रूप से चुनें'
-                                            : 'Category suggestion — confirm or choose manually'),
+                                    str('ai_suggestions', lang),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,

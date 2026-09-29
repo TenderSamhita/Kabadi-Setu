@@ -5,6 +5,7 @@ import '../app_state.dart';
 import '../models/lot.dart';
 import '../strings.dart';
 import '../theme.dart';
+import 'dataset_explorer_screen.dart';
 import 'rate_editor_screen.dart';
 import 'receipt_screen.dart';
 import 'recycler_gate_screen.dart';
@@ -53,6 +54,15 @@ class RecyclerHomeScreen extends StatelessWidget {
             icon: const Icon(Icons.swap_horiz, color: kBrass),
             onPressed: () => Navigator.of(context).pushReplacement<void, void>(
               MaterialPageRoute<void>(builder: (_) => const RoleScreen()),
+            ),
+          ),
+          // Dataset Explorer button
+          IconButton(
+            tooltip: 'Dataset Explorer',
+            icon: const Icon(Icons.dataset_outlined, color: kBrass),
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute<void>(
+                  builder: (_) => const DatasetExplorerScreen()),
             ),
           ),
           // Recycler role badge

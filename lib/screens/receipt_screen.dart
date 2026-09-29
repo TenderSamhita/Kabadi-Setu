@@ -34,21 +34,129 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     _currentLot = widget.lot;
   }
 
-  void _markPaid() {
+  void _showPaymentMethodSheet() {
     final state = context.read<AppState>();
     final lang = state.language;
-    state.markLotPaid(_currentLot.referenceCode);
+    final upiRefController = TextEditingController();
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: kCard,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 48, height: 5,
+                  decoration: BoxDecoration(color: kRule, borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                lang == 'mr'
+                    ? 'पेमेंट पद्धत निवडा'
+                    : (lang == 'hi' ? 'भुगतान विधि चुनें' : 'Select Payment Method'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kInk),
+              ),
+              const SizedBox(height: 16),
+              // Cash button
+              SizedBox(
+                height: 56,
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(sheetCtx).pop();
+                    _markPaid(state, lang, PaymentMethod.cash, null);
+                  },
+                  icon: const Icon(Icons.payments, size: 22),
+                  label: Text(
+                    lang == 'mr' ? 'रोख (Cash)' : (lang == 'hi' ? 'नकद (Cash)' : 'Cash Payment'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: kBrass,
+                    foregroundColor: kBoardDeep,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // UPI section
+              TextField(
+                controller: upiRefController,
+                textCapitalization: TextCapitalization.characters,
+                decoration: InputDecoration(
+                  labelText: lang == 'mr'
+                      ? 'UPI संदर्भ क्रमांक (पर्यायी)'
+                      : (lang == 'hi' ? 'UPI संदर्भ संख्या (वैकल्पिक)' : 'UPI Reference No. (optional)'),
+                  hintText: 'e.g. UPI-20260929-8842',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.account_balance, size: 18),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 56,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    final ref = upiRefController.text.trim();
+                    Navigator.of(sheetCtx).pop();
+                    _markPaid(state, lang, PaymentMethod.upi, ref.isEmpty ? null : ref);
+                  },
+                  icon: const Icon(Icons.phone_android, size: 22, color: kSignal),
+                  label: Text(
+                    lang == 'mr' ? 'UPI / ऑनलाइन पेमेंट' : (lang == 'hi' ? 'UPI / ऑनलाइन भुगतान' : 'UPI / Online Payment'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kSignal),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: kSignal, width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _markPaid(AppState state, String lang, PaymentMethod method, String? upiRef) {
+    state.markLotPaid(
+      _currentLot.referenceCode,
+      method: method,
+      upiRef: upiRef,
+    );
     setState(() {
-      _currentLot = _currentLot.copyWith(status: LotStatus.paid);
+      _currentLot = _currentLot.copyWith(
+        status: LotStatus.paid,
+        paymentMethod: method,
+        upiRef: upiRef,
+      );
     });
+    final methodLabel = method == PaymentMethod.upi
+        ? 'UPI'
+        : (lang == 'mr' ? 'रोख' : (lang == 'hi' ? 'नकद' : 'Cash'));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           lang == 'en'
-              ? 'Cash payment recorded as paid and updated in ledger!'
+              ? '$methodLabel payment recorded and updated in ledger!'
               : (lang == 'mr'
-                  ? 'रोख चुकता नोंदवली आणि नोंदवहीत अद्ययावत झाली!'
-                  : 'नकद भुगतान दर्ज किया गया और बही-खाते में अपडेट हुआ!'),
+                  ? '$methodLabel चुकता नोंदवली आणि नोंदवहीत अद्ययावत झाली!'
+                  : '$methodLabel भुगतान दर्ज किया और बही-खाते में अपडेट हुआ!'),
         ),
         backgroundColor: kSignal,
       ),
@@ -452,7 +560,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       width: double.infinity,
                       height: 64,
                       child: FilledButton.icon(
-                        onPressed: _markPaid,
+                        onPressed: _showPaymentMethodSheet,
                         icon: const Icon(Icons.payments, size: 24),
                         label: Text(
                           str('mark_paid', lang),

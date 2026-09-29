@@ -373,51 +373,66 @@ class _TransactionTile extends StatelessWidget {
             color: kInk,
           ),
         ),
-        subtitle: Row(
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Ref: ${lot.referenceCode}',
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: kInkSoft,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-              decoration: BoxDecoration(
-                color: isPaid ? kSignal.withAlpha(20) : kAlert.withAlpha(20),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isPaid ? Icons.check_circle : Icons.access_time,
-                    size: 11,
-                    color: isPaid ? kSignal : kAlert,
+            Row(
+              children: [
+                Text(
+                  'Ref: ${lot.referenceCode}',
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: kInkSoft,
                   ),
-                  const SizedBox(width: 3),
-                  Text(
-                    isPaid
-                        ? (lang == 'en'
-                            ? 'Paid'
-                            : (lang == 'mr' ? 'रोख चुकता' : 'नकद प्राप्त'))
-                        : (lang == 'en'
-                            ? 'Pending'
-                            : (lang == 'mr' ? 'रोख प्रलंबित' : 'नकद बकाया')),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: isPaid ? kSignal : kAlert,
-                    ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: isPaid ? kSignal.withAlpha(20) : kAlert.withAlpha(20),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                ],
-              ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isPaid ? Icons.check_circle : Icons.access_time,
+                        size: 11,
+                        color: isPaid ? kSignal : kAlert,
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        isPaid
+                            ? _paidLabel(lot, lang)
+                            : (lang == 'en'
+                                ? 'Pending'
+                                : (lang == 'mr' ? 'प्रलंबित' : 'बकाया')),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: isPaid ? kSignal : kAlert,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+            if (lot.lotRef != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  lot.lotRef!,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontFamily: 'monospace',
+                    color: kInkSoft,
+                  ),
+                ),
+              ),
           ],
         ),
         trailing: Row(
@@ -497,4 +512,12 @@ class _TransactionTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Returns a localised label reflecting the actual payment method recorded on the lot.
+String _paidLabel(Lot lot, String lang) {
+  final isUpi = lot.paymentMethod == PaymentMethod.upi;
+  if (lang == 'en') return isUpi ? 'UPI Paid' : 'Cash Paid';
+  if (lang == 'mr') return isUpi ? 'UPI चुकता' : 'रोख चुकता';
+  return isUpi ? 'UPI प्राप्त' : 'नकद प्राप्त';
 }
